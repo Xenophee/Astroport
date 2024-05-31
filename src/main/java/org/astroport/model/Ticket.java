@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class Ticket {
     private int id;
     private DockSpot dockSpot;
-    private String shipRegNumber;
+    private String shipName;
     private double price;
     private LocalDateTime inTime;
     private LocalDateTime outTime;
@@ -18,20 +18,20 @@ public class Ticket {
         this.id = id;
     }
 
-    public DockSpot getParkingSpot() {
+    public DockSpot getDockSpot() {
         return dockSpot;
     }
 
-    public void setParkingSpot(DockSpot dockSpot) {
+    public void setDockSpot(DockSpot dockSpot) {
         this.dockSpot = dockSpot;
     }
 
-    public String getVehicleRegNumber() {
-        return shipRegNumber;
+    public String getShipName() {
+        return shipName;
     }
 
-    public void setVehicleRegNumber(String shipRegNumber) {
-        this.shipRegNumber = shipRegNumber;
+    public void setShipName(String ShipName) {
+        this.shipName = ShipName;
     }
 
     public double getPrice() {
