@@ -17,7 +17,7 @@ public class DockSpotDAO {
     public DatabaseConfig databaseConfig = new DatabaseConfig();
 
 
-    public Optional<Integer> getNextAvailableSlot(DockType dockType) throws Exception {
+    public Optional<Integer> getNextAvailableSlot(DockType dockType) {
         Optional<Integer> result = Optional.empty();
         try (
                 Connection con = databaseConfig.getConnection();

@@ -22,8 +22,8 @@ public class TicketDAO {
                 Connection con = databaseConfig.getConnection();
                 PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_INSERT_NEW_TICKET)
         ) {
-            ps.setInt(1, ticket.getParkingSpot().getId());
-            ps.setString(2, ticket.getVehicleRegNumber());
+            ps.setInt(1, ticket.getDockSpot().getId());
+            ps.setString(2, ticket.getShipName());
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, Timestamp.valueOf(ticket.getInTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null) ? null : Timestamp.valueOf(ticket.getOutTime()));
@@ -35,13 +35,13 @@ public class TicketDAO {
     }
 
 
-    public int getNbTicket(String vehicleRegNumber) {
+    public int getNbTicket(String shipName) {
         int nbTickets = 0;
         try (
                 Connection con = databaseConfig.getConnection();
-                PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_GET_TICKET_COUNT_BY_SHIP_REG_NUMBER);
+                PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_GET_TICKET_COUNT_BY_SHIP_NAME);
         ) {
-            ps.setString(1, vehicleRegNumber);
+            ps.setString(1, shipName);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) nbTickets = rs.getInt(1);
             }
@@ -52,21 +52,21 @@ public class TicketDAO {
     }
 
 
-    public Ticket getTicket(String vehicleRegNumber) {
+    public Ticket getTicket(String shipName) {
         Ticket ticket = null;
         try (
                 Connection con = databaseConfig.getConnection();
-                PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_GET_TICKET_BY_SHIP_REG_NUMBER)
+                PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_GET_TICKET_BY_SHIP_NAME)
         ) {
-            ps.setString(1, vehicleRegNumber);
+            ps.setString(1, shipName);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ticket = new Ticket();
-                    DockSpot parkingSpot = new DockSpot(rs.getInt(1), DockType.valueOf(rs.getString(6)), false);
-                    ticket.setParkingSpot(parkingSpot);
+                    DockSpot dockSpot = new DockSpot(rs.getInt(1), DockType.valueOf(rs.getString(6)), false);
+                    ticket.setDockSpot(dockSpot);
                     ticket.setId(rs.getInt(2));
-                    ticket.setVehicleRegNumber(vehicleRegNumber);
+                    ticket.setShipName(shipName);
                     ticket.setPrice(rs.getDouble(3));
 
                     Timestamp inTime = rs.getTimestamp(4);
