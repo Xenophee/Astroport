@@ -18,6 +18,14 @@ public class ConsoleColorsUtil {
         return BLACK_BOLD + WHITE_BACKGROUND + message +  RESET;
     }
 
+    public static String notificationMessage(String message) {
+        return BLACK_BOLD + BLUE_BACKGROUND + message +  RESET;
+    }
+
+    public static String valueMessage(String message) {
+        return CYAN + message +  RESET;
+    }
+
     public static String optionMessage(String message) {
         return BLUE + message +  RESET;
     }
