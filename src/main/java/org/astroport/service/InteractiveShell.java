@@ -10,10 +10,10 @@ import java.util.ResourceBundle;
 import static org.astroport.util.ConsoleColorsUtil.*;
 
 public class InteractiveShell {
-;
+
     private final LanguageUtil languageInterface;
-    private ResourceBundle messages;
-    private ResourceBundle errors;
+    private final ResourceBundle messages;
+    private final ResourceBundle errors;
 
     private final DockService dockService;
 

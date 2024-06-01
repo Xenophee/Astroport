@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 
 import static org.astroport.util.ConsoleColorsUtil.optionMessage;
 
-public class ShipService {;
+public class ShipService {
     private final LanguageUtil languageInterface;
     private final ResourceBundle messages;
     private final ResourceBundle errors;
