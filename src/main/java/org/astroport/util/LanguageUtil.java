@@ -1,29 +1,13 @@
 package org.astroport.util;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class LanguageUtil {
 
-    private static LanguageUtil instance;
-
     private String language;
-    public ResourceBundle messages;
-    public ResourceBundle errors;
-
-    private LanguageUtil() {}
-
-    public static LanguageUtil getInstance() {
-        if (instance == null) {
-            instance = new LanguageUtil();
-        }
-        return instance;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
+    private ResourceBundle messages;
+    private ResourceBundle errors;
 
     public void setLanguage(String language) {
         this.language = language;
@@ -39,7 +23,7 @@ public class LanguageUtil {
         return errors;
     }
 
-    public static void reset() {
-        instance = null;
+    public String getLanguage() {
+        return language;
     }
 }

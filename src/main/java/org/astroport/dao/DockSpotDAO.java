@@ -14,7 +14,11 @@ import java.util.Optional;
 public class DockSpotDAO {
     private static final Logger logger = LogManager.getLogger("DockSpotDAO");
 
-    public DatabaseConfig databaseConfig = new DatabaseConfig();
+    public DatabaseConfig databaseConfig;
+
+    public DockSpotDAO(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
+    }
 
 
     public Optional<Integer> getNextAvailableSlot(DockType dockType) {

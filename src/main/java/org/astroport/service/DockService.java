@@ -2,13 +2,13 @@ package org.astroport.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.astroport.AppConfig;
 import org.astroport.Main;
 import org.astroport.constants.DockType;
 import org.astroport.dao.DockSpotDAO;
 import org.astroport.dao.TicketDAO;
 import org.astroport.model.DockSpot;
 import org.astroport.model.Ticket;
-import org.astroport.util.InputReaderUtil;
 import org.astroport.util.LanguageUtil;
 
 import java.util.Optional;
@@ -20,37 +20,41 @@ import static org.astroport.util.ConsoleColorsUtil.*;
 public class DockService {
 
     private static final Logger logger = LogManager.getLogger("DockService");
-    private static final LanguageUtil languageUtil = LanguageUtil.getInstance();
-    private final ResourceBundle messages = languageUtil.getMessages();
-    private final ResourceBundle errors = languageUtil.getErrors();
+    private final LanguageUtil languageInterface;
+    private final ResourceBundle messages;
+    private final ResourceBundle errors;
 
-    private final InputReaderUtil inputReaderUtil;
     private final DockSpotDAO dockSpotDAO;
     private final TicketDAO ticketDAO;
     private final ShipService shipService;
+    private final TicketService ticketService;
 
-    public DockService(InputReaderUtil inputReaderUtil, DockSpotDAO dockSpotDAO, TicketDAO ticketDAO, ShipService shipService) {
-        this.inputReaderUtil = inputReaderUtil;
+    public DockService(DockSpotDAO dockSpotDAO, TicketDAO ticketDAO, ShipService shipService, TicketService ticketService) {
+        this.languageInterface = AppConfig.getLanguageInterface();
+        this.messages = languageInterface.getMessages();
+        this.errors = languageInterface.getErrors();
+
         this.dockSpotDAO = dockSpotDAO;
         this.ticketDAO = ticketDAO;
         this.shipService = shipService;
+        this.ticketService = ticketService;
     }
 
     public void processIncomingShip() {
         try {
             Optional<DockSpot> dockSpot = getNextDockNumberIfAvailable();
             if (dockSpot.isPresent()) {
-                String shipName = getShipName();
+                String shipName = shipService.getShipName();
                 dockSpot.get().setAvailable(false);
                 dockSpotDAO.updateDock(dockSpot.get());
 
-                Ticket ticket = createAndSaveTicket(dockSpot.get(), shipName);
+                Ticket ticket = ticketService.createAndSaveTicket(dockSpot.get(), shipName);
 
                 if (ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT) {
                     System.out.println("\n" + notificationMessage(" Welcome back ! As a recurring Astroport user, you'll benefit from a 5% discount. "));
                 }
 
-                printTicketDetails(dockSpot.get(), shipName, ticket.getInTime());
+                ticketService.printTicketDetails(dockSpot.get(), shipName, ticket.getInTime());
 
                 Main.resetApp();
             }
@@ -61,7 +65,7 @@ public class DockService {
 
 
     public Optional<DockSpot> getNextDockNumberIfAvailable() {
-        DockType dockType = getShipType();
+        DockType dockType = shipService.getShipType();
         Optional<Integer> dockNumber = dockSpotDAO.getNextAvailableSlot(dockType);
 
         if (dockNumber.isPresent() && dockNumber.get() > 0) {
@@ -75,7 +79,7 @@ public class DockService {
 
     public void processExitingShip() {
         try {
-            String shipName = getShipName();
+            String shipName = shipService.getShipName();
             Ticket ticket = ticketDAO.getTicket(shipName);
 
             if (ticket == null) {
@@ -83,8 +87,8 @@ public class DockService {
                 return;
             }
 
-            calculateAndSetFare(shipName, ticket);
-            updateTicketAndDockSpot(ticket);
+            ticketService.calculateAndSetFare(shipName, ticket);
+            ticketService.updateTicketAndDockSpot(ticket);
 
         } catch (Exception e) {
             logger.error("Unable to process exiting ship", e);

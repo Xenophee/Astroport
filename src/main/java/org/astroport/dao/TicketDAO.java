@@ -14,7 +14,11 @@ public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
 
-    public DatabaseConfig databaseConfig = new DatabaseConfig();
+    public DatabaseConfig databaseConfig;
+
+    public TicketDAO(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
+    }
 
 
     public boolean saveTicket(Ticket ticket) {

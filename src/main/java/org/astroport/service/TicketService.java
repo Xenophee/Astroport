@@ -1,5 +1,8 @@
 package org.astroport.service;
 
+import org.astroport.AppConfig;
+import org.astroport.dao.DockSpotDAO;
+import org.astroport.dao.TicketDAO;
 import org.astroport.model.DockSpot;
 import org.astroport.model.Ticket;
 import org.astroport.util.LanguageUtil;
@@ -12,19 +15,25 @@ import static org.astroport.util.ConsoleColorsUtil.notificationMessage;
 import static org.astroport.util.ConsoleColorsUtil.valueMessage;
 
 public class TicketService {
-    private static final LanguageUtil languageUtil = LanguageUtil.getInstance();
-    private final ResourceBundle messages = languageUtil.getMessages();
-    private final ResourceBundle errors = languageUtil.getErrors();
+    private final LanguageUtil languageInterface;
+    private final ResourceBundle messages;
+    private final ResourceBundle errors;
 
     private final TicketDAO ticketDAO;
+    private final DockSpotDAO dockSpotDAO;
     private final FareCalculatorService fareCalculatorService;
 
-    public TicketService(TicketDAO ticketDAO, FareCalculatorService fareCalculatorService) {
+    public TicketService(TicketDAO ticketDAO, DockSpotDAO dockSpotDAO ,FareCalculatorService fareCalculatorService) {
+        this.languageInterface = AppConfig.getLanguageInterface();
+        this.messages = languageInterface.getMessages();
+        this.errors = languageInterface.getErrors();
+
         this.ticketDAO = ticketDAO;
+        this.dockSpotDAO = dockSpotDAO;
         this.fareCalculatorService = fareCalculatorService;
     }
 
-    private Ticket createAndSaveTicket(DockSpot dockSpot, String shipName) {
+    public Ticket createAndSaveTicket(DockSpot dockSpot, String shipName) {
         Ticket ticket = new Ticket();
         ticket.setDockSpot(dockSpot);
         ticket.setShipName(shipName);
@@ -35,7 +44,15 @@ public class TicketService {
         return ticket;
     }
 
-    private void updateTicketAndDockSpot(Ticket ticket) {
+    public void calculateAndSetFare(String shipName, Ticket ticket) {
+        LocalDateTime outTime = LocalDateTime.now();
+        ticket.setOutTime(outTime);
+
+        boolean discount = ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT;
+        fareCalculatorService.calculateFare(ticket, discount);
+    }
+
+    public void updateTicketAndDockSpot(Ticket ticket) {
         if (ticketDAO.updateTicket(ticket)) {
             DockSpot dockSpot = ticket.getDockSpot();
             dockSpot.setAvailable(true);
@@ -53,7 +70,7 @@ public class TicketService {
         }
     }
 
-    private void printTicketDetails(DockSpot dockSpot, String shipName, LocalDateTime inTime) {
+    public void printTicketDetails(DockSpot dockSpot, String shipName, LocalDateTime inTime) {
         System.out.println("\nGenerated Ticket and saved in DB");
         System.out.println("Please park your ship in spot number : " + valueMessage(String.valueOf(dockSpot.getId())));
         System.out.println("Recorded in-time for ship name : " + valueMessage(shipName) + " is : " + valueMessage(String.valueOf(inTime)));

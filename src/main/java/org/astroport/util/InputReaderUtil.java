@@ -12,7 +12,7 @@ public class InputReaderUtil {
     private static final Scanner scan = new Scanner(System.in);
 
 
-    public Optional<Integer> readSelection() {
+    public static Optional<Integer> readAnInteger() {
         try {
             return Optional.of(Integer.parseInt(scan.nextLine()));
         } catch (NumberFormatException e) {
@@ -22,7 +22,7 @@ public class InputReaderUtil {
         }
     }
 
-    public Optional<String> readAString() {
+    public static Optional<String> readAString() {
         String stringScan = scan.nextLine().trim();
         if (stringScan.isEmpty()) {
             logger.error("Invalid input : empty string");

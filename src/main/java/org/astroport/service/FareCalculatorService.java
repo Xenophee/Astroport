@@ -1,27 +1,28 @@
 package org.astroport.service;
 
+import org.astroport.AppConfig;
 import org.astroport.constants.Fare;
 import org.astroport.model.Ticket;
 import org.astroport.util.LanguageUtil;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ResourceBundle;
 
 import static org.astroport.constants.Discount.*;
 import static org.astroport.util.NumbersUtil.roundDecimals;
 
 public class FareCalculatorService {
 
-    private static final LanguageUtil languageUtil = LanguageUtil.getInstance();
+    private final LanguageUtil languageInterface;
+    private final ResourceBundle messages;
+    private final ResourceBundle errors;
 
-    private void calculateAndSetFare(String shipName, Ticket ticket) {
-        LocalDateTime outTime = LocalDateTime.now();
-        ticket.setOutTime(outTime);
-
-        boolean discount = ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT;
-        calculateFare(ticket, discount);
+    public FareCalculatorService() {
+        this.languageInterface = AppConfig.getLanguageInterface();
+        this.messages = languageInterface.getMessages();
+        this.errors = languageInterface.getErrors();
     }
-
 
     public void calculateFare(Ticket ticket, boolean discount) {
         if (ticket.getOutTime() == null || ticket.getOutTime().isBefore(ticket.getInTime())) {

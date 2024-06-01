@@ -1,6 +1,6 @@
 package org.astroport.service;
 
-import org.astroport.Application;
+import org.astroport.AppConfig;
 import org.astroport.util.InputReaderUtil;
 import org.astroport.util.LanguageUtil;
 
@@ -10,21 +10,23 @@ import java.util.ResourceBundle;
 import static org.astroport.util.ConsoleColorsUtil.*;
 
 public class InteractiveShell {
-
-    private static final LanguageUtil languageUtil = LanguageUtil.getInstance();
+;
+    private final LanguageUtil languageInterface;
     private ResourceBundle messages;
     private ResourceBundle errors;
 
-    private final InputReaderUtil inputReaderUtil;
+    private final DockService dockService;
 
+    public InteractiveShell(DockService dockService) {
+        this.languageInterface = AppConfig.getLanguageInterface();
+        this.messages = languageInterface.getMessages();
+        this.errors = languageInterface.getErrors();
 
-    public InteractiveShell(InputReaderUtil inputReaderUtil) {
-        this.inputReaderUtil = inputReaderUtil;
+        this.dockService = dockService;
     }
 
-    public void loadInterface() {
 
-        chooseLanguage();
+    public void loadInterface() {
 
         System.out.println(System.lineSeparator());
         System.out.println(welcomeMessage(messages.getString("welcome")));
@@ -44,8 +46,7 @@ public class InteractiveShell {
         boolean runningApp = true;
 
         while (runningApp) {
-            Optional<Integer> option = inputReaderUtil.readSelection();
-            DockService dockService = new Application().createDockService();
+            Optional<Integer> option = InputReaderUtil.readAnInteger();
 
             if (option.isPresent()) {
                 switch(option.get()){
@@ -66,35 +67,7 @@ public class InteractiveShell {
                 }
             }
 
-
         }
-    }
-
-
-    private void chooseLanguage() {
-        System.out.println("\n--------------------------------------------------");
-        System.out.println("Please select a language by entering the right number : ");
-        System.out.println(optionMessage("1. English"));
-        System.out.println(optionMessage("2. French"));
-        System.out.println("--------------------------------------------------");
-
-        String language = null;
-
-        while (language == null) {
-            Optional<Integer> option = inputReaderUtil.readSelection();
-            language = option.map(integer -> switch (integer) {
-                case 1 -> "en";
-                case 2 -> "fr";
-                default -> null;
-            }).orElse(null);
-
-            if (language == null) {
-                System.out.println("Invalid selection. Please enter 1 for English or 2 for French.");
-            }
-        }
-        languageUtil.setLanguage(language);
-        this.messages = languageUtil.getMessages();
-        this.errors = languageUtil.getErrors();
     }
 
 }
