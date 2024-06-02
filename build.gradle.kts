@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("mysql:mysql-connector-java:8.0.26")
+    implementation("com.mysql:mysql-connector-j:8.4.0")
     implementation("org.apache.logging.log4j:log4j-core:2.23.1")
 
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
