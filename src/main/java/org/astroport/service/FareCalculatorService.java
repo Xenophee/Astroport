@@ -1,7 +1,6 @@
 package org.astroport.service;
 
 import org.astroport.AppConfig;
-import org.astroport.constants.Fare;
 import org.astroport.model.Ticket;
 import org.astroport.util.LanguageUtil;
 
@@ -14,17 +13,15 @@ import static org.astroport.util.NumbersUtil.roundDecimals;
 
 public class FareCalculatorService {
 
-    private final LanguageUtil languageInterface;
-    private final ResourceBundle messages;
-    private final ResourceBundle errors;
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
-    public FareCalculatorService() {
-        this.languageInterface = AppConfig.getLanguageInterface();
-        this.messages = languageInterface.getMessages();
-        this.errors = languageInterface.getErrors();
-    }
+
+    public FareCalculatorService() {}
 
     public void calculateFare(Ticket ticket, boolean discount) {
+
         if (ticket.getOutTime() == null || ticket.getOutTime().isBefore(ticket.getInTime())) {
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
@@ -37,32 +34,9 @@ public class FareCalculatorService {
 
         if (durationInHours <= MAX_HOURS_FREE_PARKING) return;
 
-        double price;
+        double ratePerHour = ticket.getDockSpot().getDockType().getRatePerHour();
 
-        switch (ticket.getDockSpot().getDockType()) {
-            case CORVETTE: {
-                price = durationInHours * Fare.CORVETTE_RATE_PER_HOUR;
-                break;
-            }
-            case DESTROYER: {
-                price =  durationInHours * Fare.DESTROYER_RATE_PER_HOUR;
-                break;
-            }
-            case CRUISER: {
-                price =  durationInHours * Fare.CRUISER_RATE_PER_HOUR;
-                break;
-            }
-            case TITAN: {
-                price =  durationInHours * Fare.TITAN_RATE_PER_HOUR;
-                break;
-            }
-            case COLOSSUS: {
-                price =  durationInHours * Fare.COLOSSUS_RATE_PER_HOUR;
-                break;
-            }
-            default:
-                throw new IllegalArgumentException("Unknown Parking Type");
-        }
+        double price = durationInHours * ratePerHour;
 
         if (discount) price *= RECURRING_USER_DISCOUNT_PERCENTAGE;
 
