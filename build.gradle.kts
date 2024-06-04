@@ -5,6 +5,7 @@ version = "1.0-SNAPSHOT"
 plugins {
     java
     application
+    jacoco
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
@@ -44,5 +45,14 @@ tasks.withType<JavaCompile> {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn("test")
+    reports {
+        xml.required = false
+        csv.required = false
+        html.required = true
+    }
 }
 

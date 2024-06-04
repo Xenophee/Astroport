@@ -1,2 +1,2 @@
-rootProject.name = "AstroPort"
+rootProject.name = "Astroport"
 
