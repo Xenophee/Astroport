@@ -2,19 +2,25 @@ package org.astroport.dao;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.astroport.AppConfig;
 import org.astroport.config.DatabaseConfig;
 import org.astroport.constants.DatabaseQueries;
 import org.astroport.constants.DockType;
 import org.astroport.model.DockSpot;
+import org.astroport.util.LanguageUtil;
 
 import java.sql.*;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 
 public class DockSpotDAO {
     private static final Logger logger = LogManager.getLogger("DockSpotDAO");
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
-    public DatabaseConfig databaseConfig;
+    public final DatabaseConfig databaseConfig;
 
     public DockSpotDAO(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
@@ -30,11 +36,11 @@ public class DockSpotDAO {
             ps.setString(1, dockType.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    result = Optional.of(rs.getInt(1));
+                    result = Optional.of(rs.getInt(1)).filter(dockNumber -> dockNumber > 0);
                 }
             }
         } catch (SQLException ex) {
-            logger.error("Error fetching dock number from DB. Parking slots might be full", ex);
+            logger.error("Error fetching dock number from DB", ex);
         }
         return result;
     }
@@ -43,17 +49,16 @@ public class DockSpotDAO {
     public boolean updateDock(DockSpot dockSpot) {
         try (
                 Connection connection = databaseConfig.getConnection();
-                PreparedStatement statement = connection.prepareStatement(DatabaseQueries.QUERY_UPDATE_DOCK_AVAILABILITY)
+                PreparedStatement ps = connection.prepareStatement(DatabaseQueries.QUERY_UPDATE_DOCK_AVAILABILITY)
         ) {
 
-            statement.setBoolean(1, dockSpot.isAvailable());
-            statement.setInt(2, dockSpot.getId());
-
-            int updatedRows = statement.executeUpdate();
-            return updatedRows == 1;
+            ps.setBoolean(1, dockSpot.isAvailable());
+            ps.setInt(2, dockSpot.getId());
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException ex) {
             logger.error("Error updating dock info", ex);
+            System.err.println(errors.getString("unableToUpdateDock"));
             return false;
         }
     }

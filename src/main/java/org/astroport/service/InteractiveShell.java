@@ -11,17 +11,13 @@ import static org.astroport.util.ConsoleColorsUtil.*;
 
 public class InteractiveShell {
 
-    private final LanguageUtil languageInterface;
-    private final ResourceBundle messages;
-    private final ResourceBundle errors;
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
     private final DockService dockService;
 
     public InteractiveShell(DockService dockService) {
-        this.languageInterface = AppConfig.getLanguageInterface();
-        this.messages = languageInterface.getMessages();
-        this.errors = languageInterface.getErrors();
-
         this.dockService = dockService;
     }
 
@@ -35,38 +31,29 @@ public class InteractiveShell {
         loadMenu();
     }
 
-    private void loadMenu(){
+
+
+    private void loadMenu() {
         System.out.println("\n--------------------------------------------------");
         System.out.println(messages.getString("select"));
-        System.out.println(optionMessage(messages.getString("mainOption1")));
-        System.out.println(optionMessage(messages.getString("mainOption2")));
-        System.out.println(optionMessage(messages.getString("mainOption3")));
+        System.out.println(optionMessage(messages.getString("incomingShipOption")));
+        System.out.println(optionMessage(messages.getString("exitingShipOption")));
+        System.out.println(optionMessage(messages.getString("exitSystemOption")));
         System.out.println("--------------------------------------------------");
 
-        boolean runningApp = true;
-
-        while (runningApp) {
-            Optional<Integer> option = InputReaderUtil.readAnInteger();
-
+        while (true) {
+            Optional<Integer> option = InputReaderUtil.readAnInteger(languageInterface);
             if (option.isPresent()) {
-                switch(option.get()){
-                    case 1: {
-                        dockService.processIncomingShip();
-                        break;
-                    }
-                    case 2: {
-                        dockService.processExitingShip();
-                        break;
-                    }
-                    case 3: {
+                switch (option.get()) {
+                    case 1 -> dockService.processIncomingShip();
+                    case 2 -> dockService.processExitingShip();
+                    case 3 -> {
                         System.out.println(messages.getString("exit"));
-                        runningApp = false;
-                        break;
+                        System.exit(0);
                     }
-                    default: System.err.println(errors.getString("noExistingOption"));
+                    default -> System.err.println(errors.getString("noExistingOption"));
                 }
             }
-
         }
     }
 

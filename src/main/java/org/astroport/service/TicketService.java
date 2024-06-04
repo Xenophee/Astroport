@@ -13,21 +13,19 @@ import java.util.ResourceBundle;
 import static org.astroport.constants.Discount.MINIMUM_VISITS_FOR_DISCOUNT;
 import static org.astroport.util.ConsoleColorsUtil.notificationMessage;
 import static org.astroport.util.ConsoleColorsUtil.valueMessage;
+import static org.astroport.util.DatesUtil.formatFullDate;
+import static org.astroport.util.NumbersUtil.doubleToStringWithZero;
 
 public class TicketService {
-    private final LanguageUtil languageInterface;
-    private final ResourceBundle messages;
-    private final ResourceBundle errors;
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
     private final TicketDAO ticketDAO;
     private final DockSpotDAO dockSpotDAO;
     private final FareCalculatorService fareCalculatorService;
 
     public TicketService(TicketDAO ticketDAO, DockSpotDAO dockSpotDAO ,FareCalculatorService fareCalculatorService) {
-        this.languageInterface = AppConfig.getLanguageInterface();
-        this.messages = languageInterface.getMessages();
-        this.errors = languageInterface.getErrors();
-
         this.ticketDAO = ticketDAO;
         this.dockSpotDAO = dockSpotDAO;
         this.fareCalculatorService = fareCalculatorService;
@@ -53,26 +51,29 @@ public class TicketService {
     }
 
     public void updateTicketAndDockSpot(Ticket ticket) {
-        if (ticketDAO.updateTicket(ticket)) {
-            DockSpot dockSpot = ticket.getDockSpot();
-            dockSpot.setAvailable(true);
-            dockSpotDAO.updateDock(dockSpot);
-
-            if ((ticket.getPrice() == 0)) {
-                System.out.println("\n" + notificationMessage(" Dock time less than 30 minutes is free "));
-            } else {
-                System.out.println("\nPlease pay the Dock fare : " + valueMessage(String.valueOf(ticket.getPrice())));
-            }
-
-            System.out.println("Recorded out-time for ship name : " + valueMessage(ticket.getShipName()) + " is : " + valueMessage(String.valueOf(ticket.getOutTime())));
-        } else {
-            System.err.println("Unable to update ticket information. Error occurred");
+        DockSpot dockSpot = ticket.getDockSpot();
+        dockSpot.setAvailable(true);
+        if (ticketDAO.updateTicket(ticket) && dockSpotDAO.updateDock(dockSpot)) {
+            printExitingTicketDetails(ticket);
         }
     }
 
-    public void printTicketDetails(DockSpot dockSpot, String shipName, LocalDateTime inTime) {
-        System.out.println("\nGenerated Ticket and saved in DB");
-        System.out.println("Please park your ship in spot number : " + valueMessage(String.valueOf(dockSpot.getId())));
-        System.out.println("Recorded in-time for ship name : " + valueMessage(shipName) + " is : " + valueMessage(String.valueOf(inTime)));
+
+    public void printIncomingTicketDetails(DockSpot dockSpot, String shipName, LocalDateTime inTime) {
+        System.out.println(messages.getString("ticketSaved"));
+        System.out.println(messages.getString("spotAllocated") + valueMessage(String.valueOf(dockSpot.getId())));
+        System.out.println(messages.getString("recordedInTime") + valueMessage(shipName) + messages.getString("is") + valueMessage(formatFullDate(inTime, languageInterface)));
+    }
+
+
+    public void printExitingTicketDetails(Ticket ticket) {
+
+        if (ticket.getPrice() == 0) {
+            System.out.println("\n" + notificationMessage(messages.getString("freeDocking")));
+        } else {
+            System.out.println(messages.getString("payTheDock") + valueMessage(doubleToStringWithZero(ticket.getPrice(), languageInterface)));
+        }
+
+        System.out.println(messages.getString("recordedOutTime") + valueMessage(ticket.getShipName()) + messages.getString("is") + valueMessage(formatFullDate(ticket.getOutTime(), languageInterface)));
     }
 }

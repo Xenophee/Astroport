@@ -12,24 +12,21 @@ import java.util.ResourceBundle;
 import static org.astroport.util.ConsoleColorsUtil.optionMessage;
 
 public class ShipService {
-    private final LanguageUtil languageInterface;
-    private final ResourceBundle messages;
-    private final ResourceBundle errors;
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
     public ShipService() {
-        this.languageInterface = AppConfig.getLanguageInterface();
-        this.messages = languageInterface.getMessages();
-        this.errors = languageInterface.getErrors();
     }
 
 
     public DockType getShipType() {
-        while (true) {
-            System.out.println(messages.getString("getShipType"));
-            String[] options = messages.getString("shipTypeOptions").split(", ");
-            Arrays.stream(options).forEach(option -> System.out.println(optionMessage(option)));
-            Optional<Integer> input = InputReaderUtil.readAnInteger();
+        System.out.println(messages.getString("getShipType"));
+        String[] options = messages.getString("shipTypeOptions").split(", ");
+        Arrays.stream(options).forEach(option -> System.out.println(optionMessage(option)));
 
+        while (true) {
+            Optional<Integer> input = InputReaderUtil.readAnInteger(languageInterface);
             if (input.isPresent() && input.get() > 0 && input.get() <= DockType.values().length) {
                 return DockType.values()[input.get() - 1];
             } else {
@@ -39,11 +36,11 @@ public class ShipService {
     }
 
     public String getShipName() {
-        Optional<String> shipName = Optional.empty();
-        while (shipName.isEmpty()) {
-            System.out.println(messages.getString("getShipName"));
-            shipName = InputReaderUtil.readAString();
-        }
+        Optional<String> shipName;
+        System.out.println(messages.getString("getShipName"));
+        do {
+            shipName = InputReaderUtil.readAString(languageInterface);
+        } while (shipName.isEmpty());
         return shipName.get();
     }
 }

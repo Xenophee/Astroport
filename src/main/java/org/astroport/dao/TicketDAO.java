@@ -2,19 +2,26 @@ package org.astroport.dao;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.astroport.AppConfig;
 import org.astroport.config.DatabaseConfig;
 import org.astroport.constants.DatabaseQueries;
 import org.astroport.constants.DockType;
 import org.astroport.model.DockSpot;
 import org.astroport.model.Ticket;
+import org.astroport.util.LanguageUtil;
 
 import java.sql.*;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
-    public DatabaseConfig databaseConfig;
+    public final DatabaseConfig databaseConfig;
 
     public TicketDAO(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
@@ -31,9 +38,10 @@ public class TicketDAO {
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, Timestamp.valueOf(ticket.getInTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null) ? null : Timestamp.valueOf(ticket.getOutTime()));
-            return ps.execute();
+            return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
             logger.error("Error saving ticket info", ex);
+            System.err.println(errors.getString("unableToSaveTicket"));
             return false;
         }
     }
@@ -56,8 +64,8 @@ public class TicketDAO {
     }
 
 
-    public Ticket getTicket(String shipName) {
-        Ticket ticket = null;
+    public Optional<Ticket> getTicket(String shipName) {
+        Optional<Ticket> ticket = Optional.empty();
         try (
                 Connection con = databaseConfig.getConnection();
                 PreparedStatement ps = con.prepareStatement(DatabaseQueries.QUERY_GET_TICKET_BY_SHIP_NAME)
@@ -66,21 +74,24 @@ public class TicketDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    ticket = new Ticket();
+                    Ticket ticketData = new Ticket();
                     DockSpot dockSpot = new DockSpot(rs.getInt(1), DockType.valueOf(rs.getString(6)), false);
-                    ticket.setDockSpot(dockSpot);
-                    ticket.setId(rs.getInt(2));
-                    ticket.setShipName(shipName);
-                    ticket.setPrice(rs.getDouble(3));
+                    ticketData.setDockSpot(dockSpot);
+                    ticketData.setId(rs.getInt(2));
+                    ticketData.setShipName(shipName);
+                    ticketData.setPrice(rs.getDouble(3));
 
                     Timestamp inTime = rs.getTimestamp(4);
-                    ticket.setInTime((inTime != null) ? inTime.toLocalDateTime() : null);
+                    ticketData.setInTime((inTime != null) ? inTime.toLocalDateTime() : null);
                     Timestamp outTime = rs.getTimestamp(5);
-                    ticket.setOutTime((outTime != null) ? outTime.toLocalDateTime() : null);
+                    ticketData.setOutTime((outTime != null) ? outTime.toLocalDateTime() : null);
+
+                    ticket = Optional.of(ticketData);
                 }
             }
         } catch (SQLException ex) {
-            logger.error("Error fetching next available slot", ex);
+            logger.error("Error when trying to get the ticket", ex);
+            System.err.println(errors.getString("noTicketForShip") + shipName);
         }
         return ticket;
     }
@@ -95,12 +106,12 @@ public class TicketDAO {
             ps.setDouble(1, ticket.getPrice());
             ps.setTimestamp(2, Timestamp.valueOf(ticket.getOutTime()));
             ps.setInt(3, ticket.getId());
-            ps.execute();
-            return true;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException ex) {
             logger.error("Error saving ticket info", ex);
+            System.err.println(errors.getString("unableToUpdateTicket"));
+            return false;
         }
-        return false;
     }
 }

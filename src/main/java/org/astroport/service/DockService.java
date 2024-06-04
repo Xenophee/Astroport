@@ -20,9 +20,9 @@ import static org.astroport.util.ConsoleColorsUtil.*;
 public class DockService {
 
     private static final Logger logger = LogManager.getLogger("DockService");
-    private final LanguageUtil languageInterface;
-    private final ResourceBundle messages;
-    private final ResourceBundle errors;
+    private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
+    private final ResourceBundle messages = languageInterface.getMessages();
+    private final ResourceBundle errors = languageInterface.getErrors();
 
     private final DockSpotDAO dockSpotDAO;
     private final TicketDAO ticketDAO;
@@ -30,10 +30,6 @@ public class DockService {
     private final TicketService ticketService;
 
     public DockService(DockSpotDAO dockSpotDAO, TicketDAO ticketDAO, ShipService shipService, TicketService ticketService) {
-        this.languageInterface = AppConfig.getLanguageInterface();
-        this.messages = languageInterface.getMessages();
-        this.errors = languageInterface.getErrors();
-
         this.dockSpotDAO = dockSpotDAO;
         this.ticketDAO = ticketDAO;
         this.shipService = shipService;
@@ -49,17 +45,14 @@ public class DockService {
                 dockSpotDAO.updateDock(dockSpot.get());
 
                 Ticket ticket = ticketService.createAndSaveTicket(dockSpot.get(), shipName);
-
-                if (ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT) {
-                    System.out.println("\n" + notificationMessage(" Welcome back ! As a recurring Astroport user, you'll benefit from a 5% discount. "));
-                }
-
-                ticketService.printTicketDetails(dockSpot.get(), shipName, ticket.getInTime());
-
-                Main.resetApp();
+                if (ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT) System.out.println("\n" + notificationMessage(messages.getString("advertDiscount")));
+                ticketService.printIncomingTicketDetails(dockSpot.get(), shipName, ticket.getInTime());
             }
         } catch (Exception e) {
             logger.error("Unable to process incoming ship", e);
+            System.err.println(errors.getString("unableToProcessIncomingShip"));
+        } finally {
+            Main.resetApp();
         }
     }
 
@@ -68,10 +61,10 @@ public class DockService {
         DockType dockType = shipService.getShipType();
         Optional<Integer> dockNumber = dockSpotDAO.getNextAvailableSlot(dockType);
 
-        if (dockNumber.isPresent() && dockNumber.get() > 0) {
+        if (dockNumber.isPresent()) {
             return Optional.of(new DockSpot(dockNumber.get(), dockType, true));
         } else {
-            System.err.println("Dock slots are full. Please try again later.");
+            System.err.println(errors.getString("noAvailableDock"));
             return Optional.empty();
         }
     }
@@ -79,22 +72,22 @@ public class DockService {
 
     public void processExitingShip() {
         try {
-            String shipName = shipService.getShipName();
-            Ticket ticket = ticketDAO.getTicket(shipName);
+            String shipName;
+            Optional<Ticket> ticket;
 
-            if (ticket == null) {
-                System.err.println("No ticket found for the ship name : " + shipName);
-                return;
-            }
+            do {
+                shipName = shipService.getShipName();
+                ticket = ticketDAO.getTicket(shipName);
+            } while (ticket.isEmpty());
 
-            ticketService.calculateAndSetFare(shipName, ticket);
-            ticketService.updateTicketAndDockSpot(ticket);
+            ticketService.calculateAndSetFare(shipName, ticket.get());
+            ticketService.updateTicketAndDockSpot(ticket.get());
 
         } catch (Exception e) {
             logger.error("Unable to process exiting ship", e);
+            System.err.println(errors.getString("unableToProcessExitingShip"));
+        } finally {
+            Main.resetApp();
         }
-
-        Main.resetApp();
     }
-
 }
