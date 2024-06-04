@@ -12,21 +12,20 @@ public class InputReaderUtil {
     private static final Scanner scan = new Scanner(System.in);
 
 
-    public static Optional<Integer> readAnInteger() {
+    public static Optional<Integer> readAnInteger(LanguageUtil languageInterface) {
         try {
             return Optional.of(Integer.parseInt(scan.nextLine()));
         } catch (NumberFormatException e) {
             logger.error("Invalid input : not a number", e);
-            System.err.println("Invalid input. Please enter a valid number.");
+            System.err.println(languageInterface.getErrors().getString("invalidNumberInput"));
             return Optional.empty();
         }
     }
 
-    public static Optional<String> readAString() {
+    public static Optional<String> readAString(LanguageUtil languageInterface) {
         String stringScan = scan.nextLine().trim();
         if (stringScan.isEmpty()) {
-            logger.error("Invalid input : empty string");
-            System.err.println("Invalid input. Please enter a valid string.");
+            System.err.println(languageInterface.getErrors().getString("invalidStringInput"));
             return Optional.empty();
         }
         return Optional.of(stringScan);
