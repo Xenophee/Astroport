@@ -22,6 +22,7 @@ public class AppConfig {
     public static InteractiveShell initializeConfig() {
 
         languageInterface = new LanguageUtil();
+        languageInterface.setLanguage("us");
         chooseLanguage();
 
         DatabaseConfig databaseConfig = new DatabaseConfig();
@@ -40,22 +41,22 @@ public class AppConfig {
     private static void chooseLanguage() {
         System.out.println("\n--------------------------------------------------");
         System.out.println("Please select a language by entering the right number : ");
-        System.out.println(optionMessage("1. English"));
+        System.out.println(optionMessage("1. English (US)"));
         System.out.println(optionMessage("2. French"));
         System.out.println("--------------------------------------------------");
 
         String language = null;
 
         while (language == null) {
-            Optional<Integer> option = InputReaderUtil.readAnInteger();
+            Optional<Integer> option = InputReaderUtil.readAnInteger(languageInterface);
             language = option.map(integer -> switch (integer) {
-                case 1 -> "en";
+                case 1 -> "us";
                 case 2 -> "fr";
                 default -> null;
             }).orElse(null);
 
             if (language == null) {
-                System.out.println("Invalid selection. Please enter 1 for English or 2 for French.");
+                System.err.println("Invalid selection. Please enter 1 for English (US) or 2 for French.");
             }
         }
         languageInterface.setLanguage(language);
