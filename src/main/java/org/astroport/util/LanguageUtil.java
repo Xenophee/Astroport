@@ -9,6 +9,12 @@ public class LanguageUtil {
     private ResourceBundle messages;
     private ResourceBundle errors;
 
+    public LanguageUtil(String language) {
+        this.language = language;
+        this.messages = ResourceBundle.getBundle("messages", Locale.forLanguageTag(language));
+        this.errors = ResourceBundle.getBundle("errors", Locale.forLanguageTag(language));
+    }
+
     public void setLanguage(String language) {
         this.language = language;
         this.messages = ResourceBundle.getBundle("messages", Locale.forLanguageTag(language));
