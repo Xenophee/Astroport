@@ -21,8 +21,7 @@ public class AppConfig {
 
     public static InteractiveShell initializeConfig() {
 
-        languageInterface = new LanguageUtil();
-        languageInterface.setLanguage("us");
+        languageInterface = new LanguageUtil("us");
         chooseLanguage();
 
         DatabaseConfig databaseConfig = new DatabaseConfig();
