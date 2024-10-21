@@ -14,6 +14,10 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+/**
+ * This class represents the Data Access Object (DAO) for managing tickets.
+ * It provides methods for saving, updating, and retrieving tickets.
+ */
 public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
@@ -23,11 +27,20 @@ public class TicketDAO {
 
     public final DatabaseConfig databaseConfig;
 
+    /**
+     * Constructor for the TicketDAO class.
+     * @param databaseConfig the configuration for the database
+     */
     public TicketDAO(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }
 
 
+    /**
+     * Saves a given ticket to the database.
+     * @param ticket the ticket to save
+     * @return a boolean indicating whether the save was successful
+     */
     public boolean saveTicket(Ticket ticket) {
         try (
                 Connection con = databaseConfig.getConnection();
@@ -39,6 +52,7 @@ public class TicketDAO {
             ps.setTimestamp(4, Timestamp.valueOf(ticket.getInTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null) ? null : Timestamp.valueOf(ticket.getOutTime()));
             return ps.executeUpdate() > 0;
+
         } catch (SQLException ex) {
             logger.error("Error saving ticket info", ex);
             System.err.println(errors.getString("unableToSaveTicket"));
@@ -47,6 +61,11 @@ public class TicketDAO {
     }
 
 
+    /**
+     * Gets the number of tickets for a given ship name.
+     * @param shipName the name of the ship
+     * @return the number of tickets
+     */
     public int getNbTicket(String shipName) {
         int nbTickets = 0;
         try (
@@ -64,6 +83,11 @@ public class TicketDAO {
     }
 
 
+    /**
+     * Gets a ticket for a given ship name.
+     * @param shipName the name of the ship
+     * @return an Optional containing the ticket, or an empty Optional if no ticket is found
+     */
     public Optional<Ticket> getTicket(String shipName) {
         Optional<Ticket> ticket = Optional.empty();
         try (
@@ -97,6 +121,11 @@ public class TicketDAO {
     }
 
 
+    /**
+     * Updates a given ticket in the database.
+     * @param ticket the ticket to update
+     * @return a boolean indicating whether the update was successful
+     */
     public boolean updateTicket(Ticket ticket) {
         try (
                 Connection con = databaseConfig.getConnection();

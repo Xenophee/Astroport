@@ -11,15 +11,24 @@ import java.util.ResourceBundle;
 
 import static org.astroport.util.ConsoleColorsUtil.optionMessage;
 
+
+/**
+ * This class represents a service for managing ships.
+ * It provides methods for getting the ship type and name.
+ */
 public class ShipService {
     private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
     private final ResourceBundle messages = languageInterface.getMessages();
     private final ResourceBundle errors = languageInterface.getErrors();
 
-    public ShipService() {
-    }
+    public ShipService() {}
 
 
+    /**
+     * Gets the type of the ship.
+     * Prints the options for ship types and continuously reads user input until a valid option is selected.
+     * @return the selected DockType
+     */
     public DockType getShipType() {
         System.out.println(messages.getString("getShipType"));
         String[] options = messages.getString("shipTypeOptions").split(", ");
@@ -35,6 +44,12 @@ public class ShipService {
         }
     }
 
+
+    /**
+     * Gets the name of the ship.
+     * Continuously reads user input until a non-empty string is entered.
+     * @return the entered ship name
+     */
     public String getShipName() {
         Optional<String> shipName;
         System.out.println(messages.getString("getShipName"));

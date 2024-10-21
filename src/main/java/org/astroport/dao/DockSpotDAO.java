@@ -14,7 +14,12 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 
+/**
+ * This class represents the Data Access Object (DAO) for managing dock spots.
+ * It provides methods for getting the next available slot and updating a dock spot.
+ */
 public class DockSpotDAO {
+
     private static final Logger logger = LogManager.getLogger("DockSpotDAO");
     private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
     private final ResourceBundle messages = languageInterface.getMessages();
@@ -22,11 +27,20 @@ public class DockSpotDAO {
 
     public final DatabaseConfig databaseConfig;
 
+    /**
+     * Constructor for the DockSpotDAO class.
+     * @param databaseConfig the configuration for the database
+     */
     public DockSpotDAO(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }
 
 
+    /**
+     * Gets the next available slot for a given dock type.
+     * @param dockType the type of the dock
+     * @return an Optional containing the next available slot number, or an empty Optional if no slot is available
+     */
     public Optional<Integer> getNextAvailableSlot(DockType dockType) {
         Optional<Integer> result = Optional.empty();
         try (
@@ -46,6 +60,11 @@ public class DockSpotDAO {
     }
 
 
+    /**
+     * Updates a given dock spot.
+     * @param dockSpot the dock spot to update
+     * @return a boolean indicating whether the update was successful
+     */
     public boolean updateDock(DockSpot dockSpot) {
         try (
                 Connection connection = databaseConfig.getConnection();

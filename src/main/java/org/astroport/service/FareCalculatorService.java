@@ -17,14 +17,18 @@ public class FareCalculatorService {
     private final ResourceBundle messages = languageInterface.getMessages();
     private final ResourceBundle errors = languageInterface.getErrors();
 
-
     public FareCalculatorService() {}
 
-    public void calculateFare(Ticket ticket, boolean discount) {
 
-        if (ticket.getOutTime() == null || ticket.getOutTime().isBefore(ticket.getInTime())) {
-            throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
-        }
+    /**
+     * Calculates the fare for a given ticket.
+     * The fare is calculated based on the duration of docking and the rate per hour for the dock type.
+     * If the docking duration is less than or equal to the maximum hours for free docking, the fare is zero.
+     * If a discount is applicable, the fare is reduced by the discount percentage.
+     * @param ticket the ticket for which to calculate the fare
+     * @param discount a boolean indicating whether a discount is applicable
+     */
+    public void calculateFare(Ticket ticket, boolean discount) {
 
         LocalDateTime inTime = ticket.getInTime();
         LocalDateTime outTime = ticket.getOutTime();

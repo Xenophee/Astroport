@@ -14,9 +14,11 @@ import org.astroport.util.LanguageUtil;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static org.astroport.constants.Discount.MINIMUM_VISITS_FOR_DISCOUNT;
-import static org.astroport.util.ConsoleColorsUtil.*;
 
+/**
+ * This class represents the service for managing docks.
+ * It provides methods for processing incoming and exiting ships.
+ */
 public class DockService {
 
     private static final Logger logger = LogManager.getLogger("DockService");
@@ -29,6 +31,13 @@ public class DockService {
     private final ShipService shipService;
     private final TicketService ticketService;
 
+    /**
+     * Constructor for the DockService class.
+     * @param dockSpotDAO the DAO for managing dock spots
+     * @param ticketDAO the DAO for managing tickets
+     * @param shipService the service for managing ships
+     * @param ticketService the service for managing tickets
+     */
     public DockService(DockSpotDAO dockSpotDAO, TicketDAO ticketDAO, ShipService shipService, TicketService ticketService) {
         this.dockSpotDAO = dockSpotDAO;
         this.ticketDAO = ticketDAO;
@@ -36,17 +45,19 @@ public class DockService {
         this.ticketService = ticketService;
     }
 
+
+    /**
+     * Processes an incoming ship.
+     * Gets the next available dock number, sets it as unavailable, and creates and saves a ticket for the ship.
+     */
     public void processIncomingShip() {
         try {
             Optional<DockSpot> dockSpot = getNextDockNumberIfAvailable();
             if (dockSpot.isPresent()) {
                 String shipName = shipService.getShipName();
                 dockSpot.get().setAvailable(false);
-                dockSpotDAO.updateDock(dockSpot.get());
 
-                Ticket ticket = ticketService.createAndSaveTicket(dockSpot.get(), shipName);
-                if (ticketDAO.getNbTicket(shipName) > MINIMUM_VISITS_FOR_DISCOUNT) System.out.println("\n" + notificationMessage(messages.getString("advertDiscount")));
-                ticketService.printIncomingTicketDetails(dockSpot.get(), shipName, ticket.getInTime());
+                if (dockSpotDAO.updateDock(dockSpot.get())) ticketService.createAndSaveTicket(dockSpot.get(), shipName);
             }
         } catch (Exception e) {
             logger.error("Unable to process incoming ship", e);
@@ -57,6 +68,10 @@ public class DockService {
     }
 
 
+    /**
+     * Gets the next available dock number if available.
+     * @return an Optional containing the next available DockSpot, or an empty Optional if no dock is available
+     */
     public Optional<DockSpot> getNextDockNumberIfAvailable() {
         DockType dockType = shipService.getShipType();
         Optional<Integer> dockNumber = dockSpotDAO.getNextAvailableSlot(dockType);
@@ -70,6 +85,10 @@ public class DockService {
     }
 
 
+    /**
+     * Processes an exiting ship.
+     * Gets the ship's ticket, calculates and sets the fare, and updates the ticket and dock spot.
+     */
     public void processExitingShip() {
         try {
             String shipName;

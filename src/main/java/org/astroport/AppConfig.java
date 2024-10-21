@@ -11,14 +11,30 @@ import java.util.Optional;
 
 import static org.astroport.util.ConsoleColorsUtil.optionMessage;
 
+
+/**
+ * This class is responsible for the application configuration.
+ * It initializes the necessary services, DAOs, and other utilities.
+ */
 public class AppConfig {
 
     private static LanguageUtil languageInterface;
 
+
+    /**
+     * Returns the language interface.
+     * @return the language interface
+     */
     public static LanguageUtil getLanguageInterface() {
         return languageInterface;
     }
 
+
+    /**
+     * Initializes the application configuration.
+     * This includes setting up the language interface, database configuration, DAOs, and services.
+     * @return an instance of InteractiveShell
+     */
     public static InteractiveShell initializeConfig() {
 
         languageInterface = new LanguageUtil("us");
@@ -37,6 +53,11 @@ public class AppConfig {
         return new InteractiveShell(dockService);
     }
 
+
+    /**
+     * Prompts the user to choose a language.
+     * The user can choose between English (US) and French.
+     */
     private static void chooseLanguage() {
         System.out.println("\n--------------------------------------------------");
         System.out.println("Please select a language by entering the right number : ");

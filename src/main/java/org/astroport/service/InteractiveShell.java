@@ -9,6 +9,10 @@ import java.util.ResourceBundle;
 
 import static org.astroport.util.ConsoleColorsUtil.*;
 
+/**
+ * This class represents an interactive shell for the application.
+ * It provides a user interface for interacting with the DockService.
+ */
 public class InteractiveShell {
 
     private final LanguageUtil languageInterface = AppConfig.getLanguageInterface();
@@ -17,11 +21,18 @@ public class InteractiveShell {
 
     private final DockService dockService;
 
+    /**
+     * Constructor for the InteractiveShell class.
+     * @param dockService the dock service to be used for processing ships
+     */
     public InteractiveShell(DockService dockService) {
         this.dockService = dockService;
     }
 
-
+    /**
+     * Loads the user interface for the application.
+     * Prints welcome messages and loads the main menu.
+     */
     public void loadInterface() {
 
         System.out.println(System.lineSeparator());
@@ -32,7 +43,11 @@ public class InteractiveShell {
     }
 
 
-
+    /**
+     * Loads the main menu for the application.
+     * Provides options for processing incoming and exiting ships, and for exiting the system.
+     * Continuously reads user input and processes the selected option.
+     */
     private void loadMenu() {
         System.out.println("\n--------------------------------------------------");
         System.out.println(messages.getString("select"));
