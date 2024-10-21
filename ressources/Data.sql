@@ -4,16 +4,14 @@ CREATE DATABASE IF NOT EXISTS astroport;
 USE astroport;
 
 /* Creating the docks table */
-CREATE TABLE docks
-(
+CREATE TABLE docks (
     DOCK_NUMBER INT PRIMARY KEY,
     AVAILABLE TINYINT NOT NULL,
     TYPE VARCHAR(10) NOT NULL
 );
 
 /* Creating the tickets table */
-CREATE TABLE tickets
-(
+CREATE TABLE tickets (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     DOCK_NUMBER INT NOT NULL,
     SHIP_NAME VARCHAR(10) NOT NULL,
