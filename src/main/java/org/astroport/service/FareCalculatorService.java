@@ -36,7 +36,7 @@ public class FareCalculatorService {
         long durationInMinutes = Duration.between(inTime, outTime).toMinutes();
         double durationInHours = roundDecimals(durationInMinutes / 60.0, 2);
 
-        if (durationInHours <= MAX_HOURS_FREE_PARKING) return;
+        if (durationInHours <= MAX_HOURS_FREE_DOCKING) return;
 
         double ratePerHour = ticket.getDockSpot().getDockType().getRatePerHour();
 
