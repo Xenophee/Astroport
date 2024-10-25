@@ -9,6 +9,8 @@
 
 Système de gestion d'ammarrage pour vaisseaux spatiaux. C'est comme pour un parking, mais en mieux parce qu'on prévoit l'horizon 2075 ! Si, si !
 
+Pour en savoir plus, vous pouvez consulter la page de mon [portfolio](https://perrine-dassonville.dev/portfolio/projet/astroport) dédiée au projet.
+
 ## Fonctionnalités
 
 - Prise en charge de la langue anglaise et française
